@@ -1,0 +1,127 @@
+<!-- Leslie Martinez -->
+
+<!DOCTYPE html>
+<html>
+<header>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</header>
+<style>
+  
+body{
+  background-color: rgb(115, 147, 179);
+}
+  
+  .info {
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 5px;
+  }
+.container{
+ 
+  justify-content: center;
+  display:flex;
+  flex-direction: row;
+  color:blue;
+
+}
+.info + br {
+    display: block;
+    margin-bottom: 15px;
+  }
+span {
+    display: inline-block;
+    margin-bottom: 5px;
+  }
+
+
+</style>
+<body class="mx-auto" style="width: 600px;">
+
+<img src="networking.jpg" class="img-fluid" alt="JavaScript">
+
+
+<h1>Networking Lab 7 JavaScript & API's</h1>
+<p> Pulls the Ip location and weather Using GET/FETCH Method </p>
+
+<div class="container text-center">
+
+ <p><span class="info">IP Address:</span> <br> <span id="ip"></span></p>
+ 
+  <p><br><span class="info">City:</span> <br> <span id="city"></span></p>
+
+  <p><span class="info">Country:</span> <br> <span id="country"></span></p>
+
+  <p><br><span class="info">Weather:</span> <br> <span id="weather"></span></p>
+</div> 
+
+<script>
+async function loadLocation() {
+  const myIpAddress = await fetch("https://api.ipify.org?format=json");
+  
+  const ipAddress = await myIpAddress.json();
+  console.log("my IP Address is: ", ipAddress);
+  const response = await fetch("https://ip-geolocation-ipwhois-io.p.rapidapi.com/json/?ip="+ipAddress.ip, {
+	"method": "GET",
+	"headers": {
+		"x-rapidapi-host": "ip-geolocation-ipwhois-io.p.rapidapi.com",
+		"x-rapidapi-key": "044e648b19mshfece6f865ead2b3p1a1a7ajsn036a4345378f"
+	}
+});
+  const location = await response.json();
+
+ document.getElementById("city").innerHTML = location.city;
+ document.getElementById("country").innerHTML = location.country;  
+ document.getElementById("ip").innerHTML = location.ip;
+
+  console.log(location); 
+
+  function processWeatherData(response) {
+  
+  var location=response.resolvedAddress;
+  var days=response.days;
+  var conditions=response.conditions;
+  console.log("Location: "+location);
+  for (var i=0;i<days.length;i++) {
+    console.log(days[i].datetime+": tempmax="+days[i].tempmax+", tempmin="+days[i].tempmin+", conditions = "+days[i].conditions);
+	todayWeather = days[0].conditions;
+  }
+}
+
+  const responseW = await fetch("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/"+location.city+"?unitGroup=metric&key=DYHREKU3ZQMW6G7D7RZ2CKQKJ&contentType=json", {
+  method: 'GET', 
+  headers: {
+ 
+  },
+           
+}).then(response => {
+  if (!response.ok) {
+    throw response; //check the http response code and if isn't ok then throw the response as an error
+  }
+            
+  return response.json(); //parse the result as JSON
+
+}).then(response => {
+  //response now contains parsed JSON ready for use
+  processWeatherData(response);
+
+}).catch((errorResponse) => {
+  if (errorResponse.text) { //additional error information
+    errorResponse.text().then( errorMessage => {
+      //errorMessage now returns the response body which includes the full error message
+    })
+  } else {
+    //no additional error information 
+  } 
+});
+
+document.getElementById("weather").innerHTML = todayWeather;
+
+}
+
+loadLocation();
+
+
+</script>
+
+</body>
+</html>
